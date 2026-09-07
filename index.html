@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>EcoScan - Rehabilitación de Suelos con IA</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <script>
+        (async function checkAuth() {
+            try {
+                const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : window.location.origin;
+                window._apiBase = apiBase;
+                const resp = await fetch(apiBase + '/api/check-auth', { credentials: 'include' });
+                const data = await resp.json();
+                if (!data.authenticated) {
+                    window.location.href = 'login.html';
+                } else {
+                    window.userData = data.user;
+                    const userDisplay = document.getElementById('userDisplay');
+                    if (userDisplay) userDisplay.textContent = data.user.nombre;
+                    const greet = document.getElementById('userGreeting');
+                    if (greet) greet.textContent = '👋 ' + data.user.nombre;
+                }
+            } catch (e) {
+                window.location.href = 'login.html';
+            }
+        })();
+    </script>
+
+    <div class="app-container">
+        <header class="header">
+            <div class="logo-container">
+                <i class="fas fa-leaf logo-icon"></i>
+                <h1 class="logo-text">EcoScan</h1>
+            </div>
+            <div class="header-actions">
+                <button id="installBtn" class="install-btn" style="display:none;">
+                    <i class="fas fa-download"></i><span>Instalar</span>
+                </button>
+                <!-- Usuario y cerrar sesión -->
+                <span id="userGreeting" style="font-size:.85rem;color:var(--text-secondary);font-weight:500;"></span>
+                <button id="logoutBtn" class="lang-btn" style="background:var(--accent-light);">
+                    <i class="fas fa-sign-out-alt"></i><span>Salir</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="hero-content">
+                <h2 id="heroTitle">Diagnóstico Inteligente de Suelos</h2>
+                <p id="heroDesc">Rehabilita la tierra con IA real. Obtén recomendaciones personalizadas según tu ubicación y características del suelo.</p>
+            </div>
+            <div class="hero-image"><i class="fas fa-seedling"></i></div>
+        </section>
+
+        <!-- Modal Tutorial -->
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Bienvenido a EcoScan</h3>
+                    <button id="closeTutorial" class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="tutorialStep"></div>
+                    <div class="tutorial-nav">
+                        <button id="prevStep" class="tutorial-btn" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+                        <span id="stepCounter">Paso 1/4</span>
+                        <button id="nextStep" class="tutorial-btn">Siguiente <i class="fas fa-chevron-right"></i></button>
+                        <button id="skipTutorial" class="tutorial-btn">Omitir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main class="main-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>Evaluación del Suelo</h3>
+                    <p>Completa los campos para obtener un diagnóstico personalizado por IA</p>
+                </div>
+                <div class="quick-tools">
+                    <button id="getLocationBtn" class="tool-btn"><i class="fas fa-map-marker-alt"></i> <span>Usar mi ubicación</span></button>
+                    <button id="scanCameraBtn" class="tool-btn"><i class="fas fa-camera"></i> <span>Escáner de suelo</span></button>
+                    <button id="showGuidesBtn" class="tool-btn"><i class="fas fa-book-open"></i> <span>Guías visuales</span></button>
+                </div>
+                <form id="soilForm" class="soil-form">
+                    <input type="hidden" id="userLatitude">
+                    <input type="hidden" id="userLongitude">
+                    <input type="hidden" id="userRegion">
+                    <div id="locationDisplay" class="location-info hidden">
+                        <i class="fas fa-location-dot"></i>
+                        <span id="locationText">Ubicación detectada</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="soilType"><i class="fas fa-mountain"></i> Tipo de suelo <span class="required">*</span></label>
+                        <select id="soilType" required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="arenoso">Arenoso - Suelto, granulado, drena rápido</option>
+                            <option value="arcilloso">Arcilloso - Pesado, compacto, retiene agua</option>
+                            <option value="limoso">Limoso - Suave, fértil, retiene humedad</option>
+                            <option value="franco">Franco - Equilibrio ideal</option>
+                            <option value="franco_arenoso">Franco arenoso</option>
+                            <option value="franco_arcilloso">Franco arcilloso</option>
+                            <option value="organico">Orgánico (turba) - Rico en materia orgánica</option>
+                            <option value="calcareo">Calcáreo - Presencia de calcio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="phLevel"><i class="fas fa-flask"></i> pH del suelo <span class="required">*</span></label>
+                        <div class="ph-input-group">
+                            <input type="range" id="phSlider" min="0" max="14" step="0.1" value="7">
+                            <input type="number" id="phLevel" step="0.1" min="0" max="14" value="7" required>
+                        </div>
+                        <div class="ph-scale">
+                            <span id="phAcid">Ácido (0-6)</span>
+                            <span id="phNeutral">Neutro (6.5-7.5)</span>
+                            <span id="phAlkaline">Alcalino (7.5-14)</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fireHistory"><i class="fas fa-fire"></i> Historial de incendios</label>
+                            <select id="fireHistory">
+                                <option value="ninguno">Sin historial</option>
+                                <option value="reciente">Incendio reciente (&lt;1 año)</option>
+                                <option value="moderado">Incendio hace 1-3 años</option>
+                                <option value="antiguo">Incendio hace +3 años</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="compaction"><i class="fas fa-weight-hanging"></i> Compactación</label>
+                            <select id="compaction">
+                                <option value="baja">Baja - Suelo suelto</option>
+                                <option value="media">Media - Moderada</option>
+                                <option value="alta">Alta - Muy compacto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="drainage"><i class="fas fa-tint"></i> Drenaje</label>
+                            <select id="drainage">
+                                <option value="bueno">Bueno - Drena rápido</option>
+                                <option value="moderado">Moderado - Adecuado</option>
+                                <option value="pobre">Pobre - Encharcamiento</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="erosion"><i class="fas fa-wind"></i> Erosión</label>
+                            <select id="erosion">
+                                <option value="baja">Baja - Sin erosión</option>
+                                <option value="media">Media - Moderada</option>
+                                <option value="alta">Alta - Severa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal"><i class="fas fa-bullseye"></i> Objetivo principal <span class="required">*</span></label>
+                        <select id="goal" required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="reforestacion">Reforestación ecológica</option>
+                            <option value="agricultura">Agricultura para consumo</option>
+                            <option value="ambos">Ambos</option>
+                        </select>
+                    </div>
+                    <div class="form-group alert-group">
+                        <label><i class="fas fa-bell"></i> Recordatorios</label>
+                        <div class="alert-options">
+                            <label>
+                                <input type="checkbox" id="enableAlerts">
+                                <span>Activar recordatorios de cuidado</span>
+                            </label>
+                            <div id="alertFrequency" class="alert-frequency hidden">
+                                <select id="alertInterval">
+                                    <option value="daily">Diario</option>
+                                    <option value="weekly">Semanal</option>
+                                    <option value="monthly">Mensual</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-microchip"></i>
+                        <span>Analizar con IA</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div id="resultsContainer" class="results-container hidden">
+                <div class="results-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Diagnóstico Completo IA</h3>
+                    <button id="closeResults" class="close-results"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="resultsContent" class="results-content"></div>
+                <div class="results-actions">
+                    <button id="scheduleReminder" class="action-btn">
+                        <i class="fas fa-bell"></i> Agendar recordatorio
+                    </button>
+                    <button id="downloadPdfBtn" class="action-btn action-btn-pdf">
+                        <i class="fas fa-file-pdf"></i> Descargar Diagnóstico PDF
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingOverlay" class="loading-overlay hidden">
+                <div class="loading-spinner">
+                    <i class="fas fa-brain fa-spin"></i>
+                    <p id="loadingText">IA analizando el suelo...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal Guías -->
+        <div id="guidesModal" class="modal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <i class="fas fa-book-open"></i>
+                    <h3>Guías Visuales</h3>
+                    <button id="closeGuidesModal" class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body guides-container">
+                    <div class="guide-tabs">
+                        <button class="guide-tab active" data-guide="ph">Guía de pH</button>
+                        <button class="guide-tab" data-guide="texture">Guía de Textura</button>
+                    </div>
+                    <div id="phGuide" class="guide-content active">
+                        <h4>Escala de pH del Suelo</h4>
+                        <div class="ph-bar">
+                            <div class="ph-segment acid">Ácido<br>0-5.5</div>
+                            <div class="ph-segment neutral">Neutro<br>5.5-7.5</div>
+                            <div class="ph-segment alkaline">Alcalino<br>7.5-14</div>
+                        </div>
+                        <div class="ph-tips">
+                            <p><strong>🌱 pH ácido (&lt;5.5):</strong> Cal agrícola (1-2 ton/ha). Ideal para pinos y arándanos.</p>
+                            <p><strong>🌿 pH neutro (5.5-7.5):</strong> Ideal para la mayoría de cultivos.</p>
+                            <p><strong>🍂 pH alcalino (&gt;7.5):</strong> Aplicar azufre elemental o materia orgánica ácida.</p>
+                        </div>
+                    </div>
+                    <div id="textureGuide" class="guide-content">
+                        <h4>Tipos de Suelo</h4>
+                        <div class="texture-grid">
+                            <div class="texture-card"><i class="fas fa-mountain"></i><strong>Arenoso</strong><p>Suelto, drena muy rápido</p></div>
+                            <div class="texture-card"><i class="fas fa-hand-peace"></i><strong>Limoso</strong><p>Suave, fértil, retiene humedad</p></div>
+                            <div class="texture-card"><i class="fas fa-grip-horizontal"></i><strong>Arcilloso</strong><p>Pegajoso, retiene agua</p></div>
+                            <div class="texture-card"><i class="fas fa-seedling"></i><strong>Franco</strong><p>Equilibrio ideal, óptimo</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Cámara -->
+        <div id="cameraModal" class="modal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <i class="fas fa-camera"></i>
+                    <h3>Escáner de Suelo con IA</h3>
+                    <button id="closeCameraModal" class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Instrucción -->
+                    <div style="background:var(--accent-light);border-radius:12px;padding:.7rem 1rem;margin-bottom:1rem;font-size:.85rem;display:flex;align-items:center;gap:.5rem;">
+                        <i class="fas fa-info-circle" style="color:var(--accent-primary);flex-shrink:0;"></i>
+                        <span>Toma o sube una foto <strong>del suelo directamente</strong> (tierra, arena, arcilla). La IA rechazará personas, objetos o cualquier cosa que no sea suelo.</span>
+                    </div>
+                    <div class="camera-container">
+                        <video id="cameraVideo" autoplay playsinline></video>
+                        <canvas id="cameraCanvas" style="display:none;"></canvas>
+                        <div class="camera-controls">
+                            <button id="capturePhoto" class="capture-btn"><i class="fas fa-camera"></i> Capturar</button>
+                            <button id="uploadPhoto" class="upload-btn"><i class="fas fa-upload"></i> Subir imagen</button>
+                            <input type="file" id="photoUpload" accept="image/*" style="display:none;">
+                        </div>
+
+                        <!-- Resultado del escaneo -->
+                        <div id="scanResult" class="scan-result hidden" style="margin-top:1rem;">
+                            <!-- Miniatura de la imagen capturada -->
+                            <img id="capturedPreview" style="display:none;width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:.75rem;" alt="Vista previa">
+                            <div id="scanAnalysis"></div>
+                            <button id="applyScanResult" class="submit-btn" style="display:none;margin-top:.75rem;padding:.65rem 1.25rem;font-size:.9rem;">
+                                <i class="fas fa-magic"></i>
+                                <span>Aplicar al formulario</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <i class="fas fa-leaf"></i>
+                    <span>EcoScan - IA para rehabilitación de suelos</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            var _base = window._apiBase || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : window.location.origin);
+            try {
+                await fetch(_base + '/api/logout', {
+                    method: 'POST', credentials: 'include'
+                });
+            } catch(e) {}
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

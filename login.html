@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoScan · Acceso</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        /* ── Página base ── */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            background: var(--bg-primary);
+            transition: background .3s, color .3s;
+        }
+
+        /* ══════════════════════════════════════════
+           PANEL IZQUIERDO — SOLO DESKTOP (>768px)
+        ══════════════════════════════════════════ */
+        .login-panel { display: none; }
+
+        @media (min-width: 769px) {
+            .login-panel {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                width: 52%;
+                min-height: 100vh;
+                padding: 3.5rem 4rem;
+                position: relative;
+                overflow: hidden;
+                background: linear-gradient(155deg, #12271a 0%, #0c1e0f 50%, #172d13 100%);
+            }
+
+            /* Círculos de luz */
+            .login-panel::before {
+                content: '';
+                position: absolute;
+                top: -150px; right: -150px;
+                width: 550px; height: 550px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(76,175,80,.14) 0%, transparent 68%);
+                pointer-events: none;
+            }
+            .login-panel::after {
+                content: '';
+                position: absolute;
+                bottom: -120px; left: -100px;
+                width: 460px; height: 460px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(46,125,50,.12) 0%, transparent 68%);
+                pointer-events: none;
+            }
+
+            /* Hojas decorativas flotantes */
+            .leaves-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+            .leaf-deco {
+                position: absolute;
+                color: rgba(76,175,80,.06);
+                animation: leafFloat 14s ease-in-out infinite;
+            }
+            .leaf-deco:nth-child(1) { font-size:7rem;  top: 4%;  left:72%; animation-delay:0s; }
+            .leaf-deco:nth-child(2) { font-size:4.5rem;top:22%;  left: 6%; animation-delay:2.5s; }
+            .leaf-deco:nth-child(3) { font-size:8rem;  top:48%;  left:80%; animation-delay:5s; }
+            .leaf-deco:nth-child(4) { font-size:5.5rem;top:70%;  left: 4%; animation-delay:1.5s; }
+            .leaf-deco:nth-child(5) { font-size:4rem;  top:86%;  left:58%; animation-delay:3.5s; }
+            .leaf-deco:nth-child(6) { font-size:3.5rem;top:36%;  left:50%; animation-delay:7s; }
+            @keyframes leafFloat {
+                0%,100% { transform: translateY(0) rotate(0deg); }
+                50%      { transform: translateY(-20px) rotate(10deg); }
+            }
+
+            /* Contenido del panel */
+            .panel-content { position: relative; z-index: 2; max-width: 500px; }
+
+            .panel-logo {
+                display: flex; align-items: center; gap: .9rem;
+                margin-bottom: 2.75rem;
+            }
+            .panel-logo i {
+                font-size: 2.6rem; color: #4caf50;
+                filter: drop-shadow(0 0 14px rgba(76,175,80,.45));
+            }
+            .panel-logo span {
+                font-size: 1.9rem; font-weight: 800;
+                background: linear-gradient(135deg, #4caf50, #81c784);
+                -webkit-background-clip: text; background-clip: text; color: transparent;
+            }
+
+            .panel-tagline {
+                font-size: 2.2rem; font-weight: 700;
+                color: #e8f5e9; line-height: 1.28;
+                margin-bottom: 1.1rem;
+            }
+            .panel-tagline em {
+                font-style: normal;
+                background: linear-gradient(90deg, #4caf50, #a5d6a7);
+                -webkit-background-clip: text; background-clip: text; color: transparent;
+            }
+
+            .panel-desc {
+                font-size: 1rem; color: rgba(232,245,233,.6);
+                line-height: 1.72; margin-bottom: 2.25rem;
+            }
+
+            /* Lista de funciones */
+            .panel-features { display: flex; flex-direction: column; gap: .85rem; }
+            .feat {
+                display: flex; align-items: center; gap: .9rem;
+                padding: .8rem 1.1rem;
+                background: rgba(255,255,255,.04);
+                border: 1px solid rgba(76,175,80,.14);
+                border-radius: 13px;
+                backdrop-filter: blur(4px);
+                transition: background .2s, transform .2s;
+            }
+            .feat:hover { background: rgba(76,175,80,.1); transform: translateX(5px); }
+            .feat-icon {
+                width: 40px; height: 40px; border-radius: 9px;
+                background: rgba(76,175,80,.16);
+                display: flex; align-items: center; justify-content: center;
+                color: #81c784; font-size: 1rem; flex-shrink: 0;
+            }
+            .feat-text strong { display:block; color:#e8f5e9; font-size:.9rem; margin-bottom:.1rem; }
+            .feat-text span   { color: rgba(232,245,233,.5); font-size:.8rem; line-height:1.4; }
+
+            /* Pie del panel */
+            .panel-foot {
+                margin-top: 2.5rem; padding-top: 1.25rem;
+                border-top: 1px solid rgba(76,175,80,.13);
+                display: flex; align-items: center; gap: .6rem;
+                color: rgba(232,245,233,.35); font-size: .78rem;
+            }
+            .panel-foot i { color: #4caf50; }
+        }
+
+        /* ══════════════════════════════════════════
+           PANEL DERECHO — formulario
+        ══════════════════════════════════════════ */
+        .login-form-side {
+            flex: 1;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border-radius: 22px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 8px 36px rgba(0,0,0,.13);
+            width: 100%; max-width: 410px;
+            animation: cardIn .4s cubic-bezier(.16,1,.3,1);
+        }
+        @keyframes cardIn {
+            from { opacity:0; transform:translateY(18px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        .auth-header { text-align:center; margin-bottom: 1.6rem; }
+        .auth-logo   { font-size:2.4rem; color:var(--accent-primary); margin-bottom:.55rem; }
+        .auth-header h2 {
+            font-size:1.65rem; font-weight:700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip:text; background-clip:text; color:transparent;
+            margin-bottom:.2rem;
+        }
+        .auth-header p { color:var(--text-secondary); font-size:.88rem; }
+
+        /* En desktop el logo/sub ya están en el panel izquierdo */
+        @media (min-width:769px) {
+            .auth-logo        { display:none; }
+            .auth-header p    { display:none; }
+            .auth-header h2   { font-size:1.45rem; }
+            .auth-header      { margin-bottom:1.2rem; }
+        }
+
+        /* Tabs */
+        .auth-tabs {
+            display:flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.6rem;
+        }
+        .auth-tab {
+            flex:1; padding:.65rem;
+            background:none; border:none;
+            font-size:.92rem; font-weight:600;
+            color:var(--text-secondary); cursor:pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom:-2px; transition:all .2s;
+            font-family:inherit;
+        }
+        .auth-tab.active { color:var(--accent-primary); border-bottom-color:var(--accent-primary); }
+        .auth-form        { display:none; }
+        .auth-form.active { display:block; }
+
+        /* Campos */
+        .field { margin-bottom:1rem; }
+        .field label {
+            display:block; font-weight:600;
+            margin-bottom:.32rem; font-size:.86rem;
+            color:var(--text-primary);
+        }
+        .field label i { margin-right:.32rem; color:var(--accent-primary); }
+        .input-wrap { position:relative; }
+        .input-wrap input {
+            width:100%; padding:.78rem 2.7rem .78rem .95rem;
+            border:2px solid var(--border-color); border-radius:11px;
+            background:var(--input-bg); color:var(--text-primary);
+            font-size:.93rem; transition:border-color .2s, box-shadow .2s;
+            font-family:inherit;
+        }
+        .input-wrap input:focus {
+            outline:none; border-color:var(--accent-primary);
+            box-shadow:0 0 0 3px rgba(46,125,50,.1);
+        }
+        .eye-btn {
+            position:absolute; right:.8rem; top:50%;
+            transform:translateY(-50%);
+            background:none; border:none;
+            color:var(--text-secondary); cursor:pointer;
+            font-size:.92rem;
+        }
+        .eye-btn:hover { color:var(--accent-primary); }
+
+        /* Botón principal */
+        .auth-btn {
+            width:100%; padding:.88rem;
+            background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color:white; border:none; border-radius:50px;
+            font-size:.98rem; font-weight:700; cursor:pointer;
+            transition:transform .2s, box-shadow .2s;
+            margin-top:.5rem;
+            display:flex; align-items:center; justify-content:center; gap:.55rem;
+            font-family:inherit;
+        }
+        .auth-btn:hover    { transform:translateY(-2px); box-shadow:0 6px 18px rgba(46,125,50,.35); }
+        .auth-btn:disabled { opacity:.7; cursor:not-allowed; transform:none; }
+        .spinner { display:none; }
+        .auth-btn.loading .btn-text { display:none; }
+        .auth-btn.loading .spinner  { display:inline-block; }
+
+        /* Mensajes */
+        .auth-msg {
+            margin-top:.85rem; padding:.6rem .95rem;
+            border-radius:9px; font-size:.87rem;
+            min-height:2rem; display:none;
+        }
+        .auth-msg.error   { display:block; background:#fdecea; color:#c62828; border:1px solid #f5c6c6; }
+        .auth-msg.success { display:block; background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+
+        .auth-footer { text-align:center; margin-top:1.4rem; color:var(--text-secondary); font-size:.84rem; }
+        .auth-footer a { color:var(--accent-primary); text-decoration:none; font-weight:600; }
+
+        /* ══════════════════════════════════════════
+           TABLET (769px – 1199px): tarjeta del formulario
+           más amplia, dejando ver el verde a los costados
+        ══════════════════════════════════════════ */
+        @media (min-width: 769px) {
+            .login-form-side { padding: 2.5rem 2.8rem; }
+            .auth-card {
+                max-width: 560px;
+                padding: 3rem 3.2rem;
+            }
+            .field { margin-bottom: 1.2rem; }
+            .input-wrap input { padding: .92rem 2.9rem .92rem 1.1rem; font-size: .98rem; }
+            .auth-btn { padding: 1.02rem; font-size: 1.03rem; }
+            .auth-tabs { margin-bottom: 1.9rem; }
+            .auth-tab { padding: .8rem; font-size: .98rem; }
+        }
+
+        /* ══════════════════════════════════════════
+           DESKTOP GRANDE (≥1200px): casi todo el panel
+           derecho, solo un margen verde visible a los lados
+        ══════════════════════════════════════════ */
+        @media (min-width: 1200px) {
+            .login-form-side { padding: 2.5rem 3.5rem; }
+            .auth-card {
+                max-width: 720px;
+                width: 92%;
+                padding: 3.6rem 4.2rem;
+                border-radius: 26px;
+            }
+            .auth-header h2 { font-size: 1.7rem; }
+            .field { margin-bottom: 1.35rem; }
+            .field label { font-size: .92rem; }
+            .input-wrap input { padding: 1.05rem 3.1rem 1.05rem 1.2rem; font-size: 1.02rem; border-radius: 13px; }
+            .auth-btn { padding: 1.12rem; font-size: 1.07rem; margin-top: .7rem; }
+            .auth-tabs { margin-bottom: 2.1rem; }
+            .auth-tab { padding: .9rem; font-size: 1.02rem; }
+            .auth-footer { margin-top: 1.7rem; font-size: .9rem; }
+        }
+
+        /* ══════════════════════════════════════════
+           ULTRA WIDE (≥1600px): tope máximo para que
+           no se vea desproporcionado
+        ══════════════════════════════════════════ */
+        @media (min-width: 1600px) {
+            .auth-card { max-width: 760px; width: 86%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-page">
+
+    <!-- ═══ PANEL IZQUIERDO (solo desktop) ═══ -->
+    <aside class="login-panel">
+        <div class="leaves-bg">
+            <i class="fas fa-leaf leaf-deco"></i>
+            <i class="fas fa-seedling leaf-deco"></i>
+            <i class="fas fa-leaf leaf-deco"></i>
+            <i class="fas fa-spa leaf-deco"></i>
+            <i class="fas fa-leaf leaf-deco"></i>
+            <i class="fas fa-seedling leaf-deco"></i>
+        </div>
+
+        <div class="panel-content">
+            <div class="panel-logo">
+                <i class="fas fa-leaf"></i>
+                <span>EcoScan</span>
+            </div>
+
+            <h1 class="panel-tagline">
+                Rehabilita la tierra<br>con <em>inteligencia artificial</em>
+            </h1>
+
+            <p class="panel-desc">
+                Diagnostica el estado de tu suelo, obtén un plan de rehabilitación
+                personalizado y descubre qué plantas son ideales para tu región y condiciones.
+            </p>
+
+            <div class="panel-features">
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-microscope"></i></div>
+                    <div class="feat-text">
+                        <strong>Diagnóstico con IA real</strong>
+                        <span>Análisis edafológico completo basado en tus datos</span>
+                    </div>
+                </div>
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-camera"></i></div>
+                    <div class="feat-text">
+                        <strong>Escáner visual de suelo</strong>
+                        <span>Sube una foto y la IA identifica tipo, pH y propiedades</span>
+                    </div>
+                </div>
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-seedling"></i></div>
+                    <div class="feat-text">
+                        <strong>Plantas nativas recomendadas</strong>
+                        <span>Especies adaptadas a tu región y condiciones exactas</span>
+                    </div>
+                </div>
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-comments"></i></div>
+                    <div class="feat-text">
+                        <strong>Chat con agrónomo IA</strong>
+                        <span>Respuestas científicas y prácticas a tus preguntas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-foot">
+                <i class="fas fa-shield-alt"></i>
+                <span>Tus datos se almacenan localmente en tu equipo</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══ FORMULARIO ═══ -->
+    <div class="login-form-side">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo"><i class="fas fa-leaf"></i></div>
+                <h2>Bienvenido</h2>
+                <p>IA para rehabilitación de suelos</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
+                <button class="auth-tab" data-tab="register">Registrarse</button>
+            </div>
+
+            <!-- LOGIN -->
+            <div id="loginForm" class="auth-form active">
+                <div class="field">
+                    <label><i class="fas fa-envelope"></i> Correo electrónico</label>
+                    <div class="input-wrap">
+                        <input type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email">
+                    </div>
+                </div>
+                <div class="field">
+                    <label><i class="fas fa-lock"></i> Contraseña</label>
+                    <div class="input-wrap">
+                        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+                        <button type="button" class="eye-btn" data-target="loginPassword"><i class="far fa-eye"></i></button>
+                    </div>
+                </div>
+                <button class="auth-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt btn-text"></i>
+                    <span class="btn-text">Acceder</span>
+                    <i class="fas fa-spinner fa-spin spinner"></i>
+                </button>
+            </div>
+
+            <!-- REGISTER -->
+            <div id="registerForm" class="auth-form">
+                <div class="field">
+                    <label><i class="fas fa-user"></i> Nombre completo</label>
+                    <div class="input-wrap">
+                        <input type="text" id="regNombre" placeholder="Tu nombre" autocomplete="name">
+                    </div>
+                </div>
+                <div class="field">
+                    <label><i class="fas fa-envelope"></i> Correo electrónico</label>
+                    <div class="input-wrap">
+                        <input type="email" id="regEmail" placeholder="tu@email.com" autocomplete="email">
+                    </div>
+                </div>
+                <div class="field">
+                    <label><i class="fas fa-lock"></i> Contraseña</label>
+                    <div class="input-wrap">
+                        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                        <button type="button" class="eye-btn" data-target="regPassword"><i class="far fa-eye"></i></button>
+                    </div>
+                </div>
+                <button class="auth-btn" id="registerBtn">
+                    <i class="fas fa-user-plus btn-text"></i>
+                    <span class="btn-text">Crear cuenta</span>
+                    <i class="fas fa-spinner fa-spin spinner"></i>
+                </button>
+            </div>
+
+            <div id="authMsg" class="auth-msg"></div>
+
+            <div class="auth-footer">
+                <a href="index.html"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+(function () {
+    // En local apunta a localhost; en produccion usa la misma URL del sitio
+    var BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:5050'
+        : window.location.origin;
+
+    /* ── Tabs ─────────────────────────────────────── */
+    document.querySelectorAll('.auth-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.auth-tab, .auth-form')
+                .forEach(function (el) { el.classList.remove('active'); });
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab + 'Form').classList.add('active');
+            hideMsg();
+        });
+    });
+
+    /* ── Mostrar/ocultar contraseña ───────────────── */
+    document.querySelectorAll('.eye-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var inp  = document.getElementById(btn.dataset.target);
+            var icon = btn.querySelector('i');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            icon.className = inp.type === 'password' ? 'far fa-eye' : 'far fa-eye-slash';
+        });
+    });
+
+    /* ── Helpers ──────────────────────────────────── */
+    function showMsg(msg, type) {
+        var el = document.getElementById('authMsg');
+        el.textContent = msg;
+        el.className = 'auth-msg ' + (type || 'error');
+    }
+    function hideMsg() {
+        var el = document.getElementById('authMsg');
+        el.className = 'auth-msg'; el.textContent = '';
+    }
+    function setLoading(btn, state) {
+        btn.disabled = state;
+        btn.classList.toggle('loading', state);
+    }
+
+    /* ── API ──────────────────────────────────────── */
+    async function apiPost(endpoint, payload) {
+        var resp = await fetch(BASE + endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        return { ok: resp.ok, data: await resp.json() };
+    }
+
+    /* ── Login ────────────────────────────────────── */
+    document.getElementById('loginBtn').addEventListener('click', async function () {
+        var email    = document.getElementById('loginEmail').value.trim();
+        var password = document.getElementById('loginPassword').value;
+        var btn      = document.getElementById('loginBtn');
+        hideMsg();
+        if (!email || !password) { showMsg('Ingresa tu correo y contrasena.'); return; }
+        setLoading(btn, true);
+        try {
+            var r = await apiPost('/api/login', { email: email, password: password });
+            if (r.ok && r.data.success) {
+                showMsg('Bienvenido, ' + r.data.user.nombre + '! Redirigiendo...', 'success');
+                setTimeout(function () { window.location.href = 'index.html'; }, 900);
+            } else {
+                showMsg(r.data.message || 'Credenciales incorrectas.');
+            }
+        } catch (e) {
+            showMsg('No se pudo conectar. Verifica que server.py este ejecutandose.');
+        } finally { setLoading(btn, false); }
+    });
+
+    ['loginEmail','loginPassword'].forEach(function (id) {
+        document.getElementById(id).addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+    });
+
+    /* ── Register ─────────────────────────────────── */
+    document.getElementById('registerBtn').addEventListener('click', async function () {
+        var nombre   = document.getElementById('regNombre').value.trim();
+        var email    = document.getElementById('regEmail').value.trim();
+        var password = document.getElementById('regPassword').value;
+        var btn      = document.getElementById('registerBtn');
+        hideMsg();
+        if (!nombre || !email || !password) { showMsg('Todos los campos son obligatorios.'); return; }
+        if (password.length < 6) { showMsg('La contrasena debe tener al menos 6 caracteres.'); return; }
+        setLoading(btn, true);
+        try {
+            var r = await apiPost('/api/register', { nombre: nombre, email: email, password: password });
+            if (r.ok && r.data.success) {
+                showMsg('Cuenta creada! Redirigiendo...', 'success');
+                setTimeout(function () { window.location.href = 'index.html'; }, 900);
+            } else {
+                showMsg(r.data.message || 'Error al registrarse.');
+            }
+        } catch (e) {
+            showMsg('No se pudo conectar. Verifica que server.py este ejecutandose.');
+        } finally { setLoading(btn, false); }
+    });
+
+    /* ── Si ya hay sesion activa ──────────────────── */
+    fetch(BASE + '/api/check-auth', { credentials: 'include' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d.authenticated) window.location.href = 'index.html'; })
+        .catch(function () {});
+})();
+</script>
+</body>
+</html>

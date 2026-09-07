@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: ecoscan
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # gunicorn es el servidor de producción real (el "python server.py" de desarrollo
+    # no está pensado para atender tráfico real). 1 proceso + 4 hilos es lo adecuado
+    # para el nivel gratuito de Render (RAM limitada) y para trabajo de espera de red
+    # (llamadas a Groq y SoilGrids), no de cómputo intensivo.
+    startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true       # Render genera uno seguro automáticamente
+      - key: GROQ_API_KEY
+        sync: false                # opcional: la app ya trae una key embebida;
+                                    # solo defínela aquí si quieres sobreescribirla
+      - key: DATABASE_URL
+        sync: false                # OBLIGATORIA: pega aquí la cadena de conexión de
+                                    # tu proyecto gratuito de Supabase o Neon (PostgreSQL).
+                                    # Sin esto, la app usará SQLite local, que se borra
+                                    # en cada reinicio/redeploy en Render.

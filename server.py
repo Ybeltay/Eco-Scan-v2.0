@@ -683,7 +683,7 @@ def _texture_class(clay: float, sand: float, silt: float) -> str:
 _GROQ_TEXT_MODELS = [
     "openai/gpt-oss-120b",   # Producción · mejor calidad de análisis · 500 t/s
     "openai/gpt-oss-20b",    # Producción · más rápido · 1000 t/s
-    "qwen/qwen3.6-27b",      # Respaldo adicional (motor distinto de OpenAI-OSS)
+    "qwen/qwen3.8-27b",      # Respaldo adicional (motor distinto de OpenAI-OSS)
 ]
 
 def _reasoning_kwargs(model_id: str, json_mode: bool, effort: str = "low") -> dict:
@@ -700,8 +700,9 @@ def _reasoning_kwargs(model_id: str, json_mode: bool, effort: str = "low") -> di
         kw["reasoning_effort"] = mapped
         kw["include_reasoning"] = False   # no necesitamos exponer el razonamiento
     elif model_id.startswith("qwen/"):
-        # qwen3.6 solo acepta none/default
-        kw["reasoning_effort"] = "none" if effort == "none" else "default"
+        # qwen3.8-27b acepta low/medium/high (a diferencia de qwen3.6, que usaba none/default)
+        mapped = effort if effort in ("low", "medium", "high") else "low"
+        kw["reasoning_effort"] = mapped
         if json_mode:
             # obligatorio: con JSON mode, "raw" no está permitido (daría error 400)
             kw["reasoning_format"] = "parsed"
@@ -797,7 +798,7 @@ def build_sg_context(sg: dict) -> str:
 
 
 # ── GROQ VISION CON CONTEXTO DE BD ────────────────────────────────────────────
-_VISION_MODEL = "qwen/qwen3.6-27b"   # único modelo de visión vigente en Groq (jul-2026)
+_VISION_MODEL = "qwen/qwen3.8-27b"   # modelo de visión vigente en Groq (qwen3.6-27b fue dado de baja el 14-sep-2026)
 
 def call_groq_vision(image_b64: str, lang: str, region: str = "", lat: str = "", lng: str = "") -> str:
     """
@@ -807,7 +808,7 @@ def call_groq_vision(image_b64: str, lang: str, region: str = "", lat: str = "",
     call_groq_enrich(), que es solo texto y no reenvía la imagen. Mantener esto
     en una única llamada de visión, con un prompt corto, es clave para no exceder
     el límite de tokens por minuto (TPM) de la cuenta gratuita de Groq para
-    modelos en preview como qwen3.6-27b.
+    modelos en preview como qwen3.8-27b.
     """
     if "," in image_b64:
         image_b64 = image_b64.split(",")[1]
@@ -860,7 +861,7 @@ Guía visual: negro/marrón oscuro=alta M.O.; rojizo=acidez/hierro libre; grisá
         temperature=0.3,
         top_p=0.95,
         response_format={"type": "json_object"},
-        reasoning_effort="none",     # ahorra tokens aquí; el enriquecimiento (paso de texto) sí razona
+        reasoning_effort="low",      # qwen3.8-27b usa low/medium/high (a diferencia de qwen3.6, que usaba none/default)
         reasoning_format="parsed",
     )
     return completion.choices[0].message.content
@@ -872,7 +873,7 @@ def call_groq_enrich(initial: dict, lang: str, db_context: str, sg_context: str)
     visualmente + la comparación con la base de datos + los datos reales de
     SoilGrids, y genera salinidad, nutrientes, plagas, plantas recomendadas y
     acciones. Al ser texto puro, usa la cadena de modelos de producción
-    (openai/gpt-oss-120b → 20b → qwen3.6-27b), con más margen de tokens que el
+    (openai/gpt-oss-120b → 20b → qwen3.8-27b), con más margen de tokens que el
     modelo de visión y con reintento automático entre modelos si alguno falla.
     """
     resumen = (

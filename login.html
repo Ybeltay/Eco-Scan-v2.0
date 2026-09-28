@@ -16,6 +16,8 @@
             display: flex;
             background: var(--bg-primary);
             transition: background .3s, color .3s;
+            position: relative;
+            overflow: hidden;
         }
 
         /* ══════════════════════════════════════════
@@ -304,11 +306,103 @@
         @media (min-width: 1600px) {
             .auth-card { max-width: 760px; width: 86%; }
         }
+        /* ══════════════════════════════════════════
+           MÓVIL (≤768px): fondo con degradado y hojas
+           flotantes animadas detrás del formulario —
+           el panel izquierdo no existe en este ancho,
+           así que el formulario necesita su propio
+           ambiente visual en vez de un fondo plano.
+        ══════════════════════════════════════════ */
+        .mobile-bg-deco { display: none; }
+
+        @media (max-width: 768px) {
+            .login-page {
+                background: linear-gradient(160deg, #12271a 0%, #0c1e0f 45%, #172d13 100%);
+            }
+
+            /* Resplandores suaves, iguales en espíritu a los del panel de escritorio */
+            .login-page::before {
+                content: '';
+                position: absolute;
+                top: -120px; right: -100px;
+                width: 340px; height: 340px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(76,175,80,.20) 0%, transparent 70%);
+                pointer-events: none;
+                z-index: 0;
+            }
+            .login-page::after {
+                content: '';
+                position: absolute;
+                bottom: -100px; left: -90px;
+                width: 300px; height: 300px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(46,125,50,.18) 0%, transparent 70%);
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            /* Hojas flotantes de fondo — solo visibles en móvil */
+            .mobile-bg-deco {
+                display: block;
+                position: absolute;
+                inset: 0;
+                overflow: hidden;
+                pointer-events: none;
+                z-index: 0;
+            }
+            .mobile-bg-deco i {
+                position: absolute;
+                color: rgba(129,199,132,.16);
+                animation: mobileLeafFloat 11s ease-in-out infinite;
+            }
+            .mobile-bg-deco i:nth-child(1) { font-size: 3.4rem; top: 8%;  left: 12%; animation-delay: 0s; }
+            .mobile-bg-deco i:nth-child(2) { font-size: 2.6rem; top: 18%; left: 74%; animation-delay: 1.8s; }
+            .mobile-bg-deco i:nth-child(3) { font-size: 4rem;   top: 78%; left: 70%; animation-delay: 3.2s; }
+            .mobile-bg-deco i:nth-child(4) { font-size: 2.2rem; top: 86%; left: 14%; animation-delay: 5s; }
+            .mobile-bg-deco i:nth-child(5) { font-size: 2.8rem; top: 46%; left: 84%; animation-delay: 2.4s; }
+
+            @keyframes mobileLeafFloat {
+                0%, 100% { transform: translateY(0) rotate(0deg); }
+                50%      { transform: translateY(-16px) rotate(8deg); }
+            }
+
+            /* El formulario debe quedar por encima de la decoración de fondo */
+            .login-form-side {
+                position: relative;
+                z-index: 2;
+            }
+
+            /* Un poco más de presencia sobre el nuevo fondo con degradado */
+            .auth-card {
+                box-shadow: 0 10px 40px rgba(0,0,0,.35);
+                border: 1px solid rgba(129,199,132,.12);
+            }
+
+            /* Logo con el mismo resplandor que usa el panel de escritorio */
+            .auth-logo {
+                filter: drop-shadow(0 0 10px rgba(76,175,80,.4));
+            }
+        }
+
+        /* Respeta a quien prefiere menos movimiento en pantalla */
+        @media (prefers-reduced-motion: reduce) {
+            .mobile-bg-deco i { animation: none; }
+        }
     </style>
 </head>
 <body>
 
 <div class="login-page">
+
+    <!-- ═══ Decoración de fondo — solo visible en móvil ═══ -->
+    <div class="mobile-bg-deco">
+        <i class="fas fa-leaf"></i>
+        <i class="fas fa-seedling"></i>
+        <i class="fas fa-leaf"></i>
+        <i class="fas fa-spa"></i>
+        <i class="fas fa-seedling"></i>
+    </div>
 
     <!-- ═══ PANEL IZQUIERDO (solo desktop) ═══ -->
     <aside class="login-panel">
@@ -369,7 +463,7 @@
 
             <div class="panel-foot">
                 <i class="fas fa-shield-alt"></i>
-                <span>Tus datos se almacenan localmente en tu equipo</span>
+                <span>Tus datos se guardan de forma segura y persistente</span>
             </div>
         </div>
     </aside>
